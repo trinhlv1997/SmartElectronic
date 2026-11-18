@@ -23,22 +23,29 @@ function timingSafeEqual(a: Uint8Array, b: Uint8Array): boolean {
 
 const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
-async function getSecrets() {
+/** null khi chưa đặt secret → admin bị khoá hoàn toàn (không ai đăng nhập được) thay vì lỗi 500. */
+async function getSecrets(): Promise<{ password: string; secret: string } | null> {
   const env = await getEnv();
-  if (!env.ADMIN_PASSWORD || !env.AUTH_SECRET) {
-    throw new Error("Thiếu secret ADMIN_PASSWORD / AUTH_SECRET (xem README).");
-  }
+  if (!env.ADMIN_PASSWORD || !env.AUTH_SECRET) return null;
   return { password: env.ADMIN_PASSWORD, secret: env.AUTH_SECRET };
 }
 
+export async function isAuthConfigured(): Promise<boolean> {
+  return (await getSecrets()) !== null;
+}
+
 export async function checkPassword(input: string): Promise<boolean> {
-  const { password, secret } = await getSecrets();
+  const secrets = await getSecrets();
+  if (!secrets) return false;
+  const { password, secret } = secrets;
   // So sánh HMAC của hai chuỗi để thời gian so sánh không phụ thuộc vào nội dung.
   return timingSafeEqual(await hmac(secret, `pw:${input}`), await hmac(secret, `pw:${password}`));
 }
 
 export async function startSession(): Promise<void> {
-  const { secret } = await getSecrets();
+  const secrets = await getSecrets();
+  if (!secrets) throw new Error("Admin chưa được cấu hình.");
+  const { secret } = secrets;
   const exp = Math.floor(Date.now() / 1000) + MAX_AGE;
   const sig = b64url(await hmac(secret, `admin:${exp}`));
   (await cookies()).set(COOKIE, `${exp}.${sig}`, {
@@ -60,7 +67,9 @@ export async function isAdmin(): Promise<boolean> {
   const [expStr, sig] = value.split(".");
   const exp = Number(expStr);
   if (!sig || !Number.isFinite(exp) || exp < Date.now() / 1000) return false;
-  const { secret } = await getSecrets();
+  const secrets = await getSecrets();
+  if (!secrets) return false;
+  const { secret } = secrets;
   const expected = b64url(await hmac(secret, `admin:${exp}`));
   return timingSafeEqual(enc.encode(sig), enc.encode(expected));
 }
