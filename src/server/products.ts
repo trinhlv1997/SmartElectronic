@@ -3,6 +3,7 @@ import { categoryLabel, isCategory } from "@/data/categories";
 import { filterProducts, type ProductFilters } from "@/lib/productFilters";
 import type { Category, Product } from "@/lib/types";
 import { getDb } from "./db";
+import { deleteAllProductImageFiles, imagesByProduct } from "./images";
 
 interface ProductRow {
   id: string;
@@ -24,7 +25,7 @@ interface ProductRow {
   updated_at: string;
 }
 
-function toProduct(r: ProductRow): Product {
+function toProduct(r: ProductRow, images: Map<string, Product["images"]>): Product {
   let specs: Record<string, string> = {};
   try {
     specs = JSON.parse(r.specs);
@@ -43,6 +44,7 @@ function toProduct(r: ProductRow): Product {
     rating: r.rating,
     icon: r.icon,
     imageUrl: r.image_url ?? undefined,
+    images: images.get(r.id) ?? [],
     description: r.description,
     specs,
     featured: r.featured === 1,
@@ -58,8 +60,11 @@ const ORDER_BY = "ORDER BY sort_order, created_at";
 
 export async function listActiveProducts(): Promise<Product[]> {
   const db = await getDb();
-  const { results } = await db.prepare(`SELECT * FROM products WHERE active = 1 ${ORDER_BY}`).all<ProductRow>();
-  return results.map(toProduct);
+  const [{ results }, images] = await Promise.all([
+    db.prepare(`SELECT * FROM products WHERE active = 1 ${ORDER_BY}`).all<ProductRow>(),
+    imagesByProduct(),
+  ]);
+  return results.map((r) => toProduct(r, images));
 }
 
 export async function searchProducts(f: ProductFilters) {
@@ -76,7 +81,7 @@ export async function searchProducts(f: ProductFilters) {
 export async function getActiveProductBySlug(slug: string): Promise<Product | null> {
   const db = await getDb();
   const row = await db.prepare("SELECT * FROM products WHERE slug = ? AND active = 1").bind(slug).first<ProductRow>();
-  return row ? toProduct(row) : null;
+  return row ? toProduct(row, await imagesByProduct([row.id])) : null;
 }
 
 export async function getActiveProductsByIds(ids: string[]): Promise<Product[]> {
@@ -87,24 +92,25 @@ export async function getActiveProductsByIds(ids: string[]): Promise<Product[]> 
     .prepare(`SELECT * FROM products WHERE active = 1 AND id IN (${placeholders})`)
     .bind(...ids)
     .all<ProductRow>();
-  return results.map(toProduct);
+  const images = await imagesByProduct(results.map((r) => r.id));
+  return results.map((r) => toProduct(r, images));
 }
 
 /* ---------- Admin ---------- */
 
 export async function listAllProducts(): Promise<Product[]> {
   const db = await getDb();
-  const { results } = await db.prepare(`SELECT * FROM products ${ORDER_BY}`).all<ProductRow>();
-  return results.map(toProduct);
+  const [{ results }, images] = await Promise.all([db.prepare(`SELECT * FROM products ${ORDER_BY}`).all<ProductRow>(), imagesByProduct()]);
+  return results.map((r) => toProduct(r, images));
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
   const db = await getDb();
   const row = await db.prepare("SELECT * FROM products WHERE id = ?").bind(id).first<ProductRow>();
-  return row ? toProduct(row) : null;
+  return row ? toProduct(row, await imagesByProduct([row.id])) : null;
 }
 
-export type ProductInput = Omit<Product, "id" | "updatedAt">;
+export type ProductInput = Omit<Product, "id" | "updatedAt" | "images">;
 
 const NOW = "strftime('%Y-%m-%dT%H:%M:%fZ', 'now')";
 
@@ -154,5 +160,7 @@ export async function updateProductQuick(
 export async function deleteProduct(id: string): Promise<void> {
   const db = await getDb();
   // order_items giữ snapshot tên/giá nên xoá sản phẩm không ảnh hưởng đơn cũ.
+  // File ảnh trong KV phải xoá tay; các dòng product_images bị D1 cascade xoá theo.
+  await deleteAllProductImageFiles(id);
   await db.prepare("DELETE FROM products WHERE id = ?").bind(id).run();
 }

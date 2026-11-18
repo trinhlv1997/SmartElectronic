@@ -8,6 +8,7 @@ import { ORDER_STATUSES, type OrderStatus } from "@/lib/types";
 import { checkPassword, endSession, requireAdmin, startSession } from "@/server/auth";
 import { updateOrderStatus } from "@/server/orders";
 import { type FieldErrors, parseProductForm } from "@/server/productForm";
+import { deleteProductImage, reorderProductImages } from "@/server/images";
 import { createProduct, deleteProduct, updateProduct, updateProductQuick } from "@/server/products";
 
 export type FormState = { error?: string; errors?: FieldErrors; message?: string } | undefined;
@@ -38,14 +39,17 @@ export async function saveProductAction(id: string | null, _prev: FormState, fd:
   const parsed = parseProductForm(fd);
   if (!parsed.ok) return { error: "Vui lòng kiểm tra lại các trường được đánh dấu.", errors: parsed.errors };
 
+  let newId: string | null = null;
   try {
     if (id) await updateProduct(id, parsed.data);
-    else await createProduct(parsed.data);
+    else newId = await createProduct(parsed.data);
   } catch (err) {
     if (isUniqueSlugError(err)) return { error: "Slug đã được dùng cho sản phẩm khác.", errors: { slug: "Slug bị trùng." } };
     throw err;
   }
   revalidatePath("/admin/products");
+  // Tạo mới → sang trang sửa để thêm ảnh (ảnh cần id sản phẩm).
+  if (newId) redirect(`/admin/products/${newId}?created=1`);
   redirect(`/admin/products?saved=${encodeURIComponent(parsed.data.name)}`);
 }
 
@@ -85,4 +89,17 @@ export async function updateOrderStatusAction(id: string, _prev: FormState, fd: 
   revalidatePath("/admin/orders");
   revalidatePath("/admin");
   return result.ok ? { message: "Đã cập nhật" } : { error: result.error };
+}
+
+export async function deleteImageAction(imageId: string): Promise<void> {
+  await requireAdmin();
+  const productId = await deleteProductImage(imageId);
+  if (productId) revalidatePath(`/admin/products/${productId}`);
+}
+
+export async function reorderImagesAction(productId: string, orderedIds: string[]): Promise<void> {
+  await requireAdmin();
+  if (!Array.isArray(orderedIds) || orderedIds.length > 50 || !orderedIds.every((x) => typeof x === "string")) return;
+  await reorderProductImages(productId, orderedIds);
+  revalidatePath(`/admin/products/${productId}`);
 }

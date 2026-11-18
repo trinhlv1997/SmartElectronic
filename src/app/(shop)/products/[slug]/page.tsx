@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/AddToCartButton";
+import ProductGallery from "@/components/ProductGallery";
 import { CATEGORIES } from "@/data/categories";
 import { getActiveProductBySlug } from "@/server/products";
 import { discountPercent, formatPrice } from "@/lib/format";
@@ -29,14 +30,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
       </nav>
 
       <div className="grid gap-8 md:grid-cols-2">
-        <div className="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-slate-50 text-[10rem] shadow-sm">
-          {product.imageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain" />
-          ) : (
-            product.icon
-          )}
-        </div>
+        <ProductGallery product={product} />
         <div className="space-y-4">
           <p className="text-sm text-slate-500">Mã sản phẩm: <strong>{product.sku}</strong></p>
           <h1 className="text-3xl font-extrabold">{product.name}</h1>

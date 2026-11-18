@@ -8,6 +8,12 @@ export type Category =
   | "solar"
   | "household";
 
+export interface ProductImage {
+  id: string;
+  width: number;
+  height: number;
+}
+
 export interface Product {
   id: string;
   slug: string;
@@ -19,7 +25,8 @@ export interface Product {
   stock: number;
   rating: number; // 0-5
   icon: string; // hiển thị khi chưa có ảnh
-  imageUrl?: string;
+  imageUrl?: string; // ảnh ngoài (URL), dùng khi chưa upload ảnh nào
+  images: ProductImage[]; // ảnh đã upload, phần tử đầu là ảnh bìa
   description: string;
   specs: Record<string, string>;
   featured: boolean;

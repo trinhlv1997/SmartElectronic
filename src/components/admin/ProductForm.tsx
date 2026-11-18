@@ -66,7 +66,7 @@ export default function ProductForm({ product, specsText }: { product?: Product;
           </div>
           <label className={label}>Biểu tượng (emoji)<input name="icon" defaultValue={product?.icon ?? "📦"} className={cls("icon")} /></label>
           <label className={label}>
-            URL ảnh <span className="font-normal text-slate-500">(tuỳ chọn)</span>
+            URL ảnh ngoài <span className="font-normal text-slate-500">(chỉ dùng khi chưa tải ảnh lên)</span>
             <input name="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." className={cls("imageUrl")} />
             <Err k="imageUrl" />
           </label>

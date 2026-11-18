@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
+import ProductThumb from "@/components/ProductThumb";
 import { formatPrice } from "@/lib/format";
 import { useCartLines } from "@/lib/useCartLines";
 
@@ -29,7 +30,7 @@ export default function CartPage() {
         <h1 className="text-2xl font-bold">Giỏ hàng</h1>
         {lines.map(({ product, quantity }) => (
           <div key={product.id} className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-3xl">{product.icon}</div>
+            <ProductThumb product={product} className="h-16 w-16 text-3xl" />
             <div className="min-w-0 flex-1">
               <Link href={`/products/${product.slug}`} className="font-medium hover:text-brand">{product.name}</Link>
               <p className="text-sm text-red-600">{formatPrice(product.price)}</p>

@@ -16,5 +16,12 @@
       "database_id": "16d47981-ea54-4f07-9eaf-be808f2489a6",
       "migrations_dir": "migrations"
     }
+  ],
+  // Ảnh sản phẩm (WebP/JPEG đã nén ở trình duyệt). Key: img/<id>/<lg|sm>
+  "kv_namespaces": [
+    {
+      "binding": "MEDIA",
+      "id": "dd9789997f5641229c8f9ee99be93bfa"
+    }
   ]
 }

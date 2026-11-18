@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { Product } from "@/lib/types";
 import { discountPercent, formatPrice } from "@/lib/format";
+import { coverImage } from "@/lib/images";
 import AddToCartButton from "./AddToCartButton";
 
 export default function ProductCard({ product }: { product: Product }) {
   const discount = discountPercent(product.price, product.oldPrice);
+  const cover = coverImage(product);
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-xl">
@@ -12,9 +14,19 @@ export default function ProductCard({ product }: { product: Product }) {
         href={`/products/${product.slug}`}
         className="relative flex aspect-square items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 text-7xl"
       >
-        {product.imageUrl ? (
+        {cover ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-contain p-4 transition group-hover:scale-105" />
+          <img
+            src={cover.src}
+            srcSet={cover.srcSet}
+            sizes="(min-width: 1280px) 300px, (min-width: 1024px) 25vw, 50vw"
+            width={cover.width}
+            height={cover.height}
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-contain p-3 transition group-hover:scale-105"
+          />
         ) : (
           <span className="transition group-hover:scale-110">{product.icon}</span>
         )}

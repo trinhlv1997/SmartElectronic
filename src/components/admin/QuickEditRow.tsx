@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { quickUpdateAction } from "@/app/admin/actions";
+import ProductThumb from "@/components/ProductThumb";
 import type { Product } from "@/lib/types";
 
 export default function QuickEditRow({ product: p, categoryLabel }: { product: Product; categoryLabel: string }) {
@@ -14,14 +15,7 @@ export default function QuickEditRow({ product: p, categoryLabel }: { product: P
     <tr className={p.active ? "" : "bg-slate-50 text-slate-400"}>
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-slate-100 text-xl">
-            {p.imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.imageUrl} alt="" className="h-full w-full object-contain" />
-            ) : (
-              p.icon
-            )}
-          </span>
+          <ProductThumb product={p} className="h-10 w-10 text-xl" />
           <div className="min-w-0">
             <Link href={`/admin/products/${p.id}`} className="font-semibold text-ink hover:text-brand">{p.name}</Link>
             <p className="text-xs text-slate-500">{p.sku}{p.featured && " · ⭐ Nổi bật"}</p>

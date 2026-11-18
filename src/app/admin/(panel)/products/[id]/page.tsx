@@ -1,12 +1,20 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import DeleteProductButton from "@/components/admin/DeleteProductButton";
+import ImageManager from "@/components/admin/ImageManager";
 import ProductForm from "@/components/admin/ProductForm";
 import { specsToText } from "@/server/productForm";
 import { getProductById } from "@/server/products";
 
-export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditProductPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ created?: string }>;
+}) {
   const product = await getProductById((await params).id);
+  const { created } = await searchParams;
   if (!product) notFound();
 
   return (
@@ -21,6 +29,8 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
           <DeleteProductButton id={product.id} name={product.name} />
         </div>
       </div>
+      {created && <p className="rounded-lg bg-green-50 p-3 text-sm text-green-700">✓ Đã tạo sản phẩm. Thêm hình ảnh bên dưới.</p>}
+      <ImageManager productId={product.id} images={product.images} />
       <ProductForm product={product} specsText={specsToText(product.specs)} />
     </div>
   );

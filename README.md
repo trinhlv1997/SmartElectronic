@@ -37,7 +37,8 @@ npm run dev                                      # http://localhost:3000, quản
 
 Sản phẩm, giá, tồn kho và đơn hàng lưu trong **Cloudflare D1**. Trang `/admin` (đăng nhập bằng mật khẩu) cho phép:
 
-- Thêm / sửa / xoá sản phẩm, ẩn/hiện, đánh dấu nổi bật, ảnh (URL), thông số
+- Thêm / sửa / xoá sản phẩm, ẩn/hiện, đánh dấu nổi bật, thông số
+- Hình ảnh: tối đa 10 ảnh/sản phẩm, kéo thả để upload, chọn ảnh bìa, sắp xếp, xoá. Ảnh được nén ngay trên trình duyệt sang WebP (1600px + 480px) rồi lưu vào Cloudflare KV, phục vụ tại `/img/<id>/<lg|sm>` với cache 1 năm
 - Sửa nhanh giá bán, giá gốc, tồn kho ngay trên bảng
 - Xem đơn hàng, đổi trạng thái (huỷ đơn tự hoàn tồn kho)
 
