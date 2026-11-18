@@ -1,3 +1,4 @@
+import { normalizeText, type ProductFilters } from "@/lib/productFilters";
 import type { Category, Product } from "@/lib/types";
 
 export const CATEGORIES: { id: Category; label: string; icon: string }[] = [
@@ -118,25 +119,38 @@ const PRODUCTS: Product[] = [
   },
 ];
 
-export interface ProductQuery {
-  category?: Category;
-  q?: string;
-  sort?: "price-asc" | "price-desc" | "rating";
-}
+export function getProducts(f: ProductFilters = {}): Product[] {
+  const tokens = f.q ? normalizeText(f.q).split(/\s+/).filter(Boolean) : [];
 
-export function getProducts(query: ProductQuery = {}): Product[] {
-  let list = PRODUCTS;
-  if (query.category) list = list.filter((p) => p.category === query.category);
-  if (query.q) {
-    const q = query.q.toLowerCase();
-    list = list.filter((p) => p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
-  }
-  switch (query.sort) {
+  const list = PRODUCTS.filter((p) => {
+    if (f.category && p.category !== f.category) return false;
+    if (f.min !== undefined && p.price < f.min) return false;
+    if (f.max !== undefined && p.price > f.max) return false;
+    if (f.inStock && p.stock === 0) return false;
+    if (f.onSale && !(p.oldPrice && p.oldPrice > p.price)) return false;
+    if (tokens.length) {
+      const label = CATEGORIES.find((c) => c.id === p.category)?.label ?? "";
+      const haystack = normalizeText(`${p.name} ${p.sku} ${label}`);
+      if (!tokens.every((t) => haystack.includes(t))) return false;
+    }
+    return true;
+  });
+
+  const discount = (p: Product) => (p.oldPrice ? (p.oldPrice - p.price) / p.oldPrice : 0);
+  switch (f.sort) {
     case "price-asc": return [...list].sort((a, b) => a.price - b.price);
     case "price-desc": return [...list].sort((a, b) => b.price - a.price);
     case "rating": return [...list].sort((a, b) => b.rating - a.rating);
+    case "discount": return [...list].sort((a, b) => discount(b) - discount(a));
     default: return list;
   }
+}
+
+/** Số sản phẩm của từng danh mục khi áp các bộ lọc còn lại (để hiển thị cạnh tên danh mục). */
+export function getCategoryCounts(f: ProductFilters): Record<Category, number> {
+  const counts = Object.fromEntries(CATEGORIES.map((c) => [c.id, 0])) as Record<Category, number>;
+  for (const p of getProducts({ ...f, category: undefined, sort: undefined })) counts[p.category]++;
+  return counts;
 }
 
 export function getFeaturedProducts(): Product[] {
