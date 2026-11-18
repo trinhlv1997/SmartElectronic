@@ -38,6 +38,7 @@ There is no test framework set up yet.
 
 ## Deployment (Cloudflare Workers, free plan)
 
+- CI/CD: Cloudflare Workers Builds is connected to the GitHub repo. A push to `main` builds with `npx opennextjs-cloudflare build` and deploys with `npx opennextjs-cloudflare deploy`, and other branches get preview versions. The Node version comes from `.nvmrc`. A push to `main` therefore deploys to production.
 - Uses `@opennextjs/cloudflare`; config is in `wrangler.jsonc` (worker `smart-electronic`) and `open-next.config.ts`.
 - The incremental cache is `static-assets-incremental-cache`, which is read-only, has no R2 and no ISR. Prerendered pages are copied into `.open-next/assets/cdn-cgi/_next_cache` by the OpenNext `preview`/`deploy` commands. Running `wrangler dev`/`wrangler deploy` directly skips that step, so every request falls back to SSR and logs "Failed to set to read-only cache" errors. Always use the npm scripts.
 - Do not add `revalidate`/ISR, `unstable_cache` writes or on-demand revalidation unless you also switch to the R2/KV cache, which requires a paid binding setup.

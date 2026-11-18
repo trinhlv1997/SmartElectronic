@@ -42,4 +42,12 @@ npx wrangler login   # chỉ cần lần đầu
 npm run deploy       # site chạy tại https://smart-electronic.<subdomain>.workers.dev
 ```
 
+### Tự động deploy khi push (Cloudflare Workers Builds)
+
+Repo được kết nối với Cloudflare Workers Builds: mỗi lần push lên nhánh `main`, Cloudflare tự build và deploy. Các nhánh khác được build thành bản preview riêng.
+
+- Build command: `npx opennextjs-cloudflare build`
+- Deploy command: `npx opennextjs-cloudflare deploy`
+- Phiên bản Node lấy từ `.nvmrc` (22).
+
 Cấu hình ở `wrangler.jsonc` và `open-next.config.ts`. Cache dùng Workers static assets (miễn phí, không cần R2) nên trang dựng sẵn không được tạo lại định kỳ (không có ISR); muốn cập nhật nội dung thì deploy lại.
