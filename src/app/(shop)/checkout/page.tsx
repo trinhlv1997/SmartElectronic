@@ -7,8 +7,8 @@ import { formatPrice } from "@/lib/format";
 import { useCartLines } from "@/lib/useCartLines";
 
 export default function CheckoutPage() {
-  const { items, hydrated, clear } = useCart();
-  const { lines, subtotal } = useCartLines();
+  const { items, clear } = useCart();
+  const { lines, subtotal, loading } = useCartLines();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -32,7 +32,7 @@ export default function CheckoutPage() {
           items,
         }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as { error?: string; order: { id: string } };
       if (!res.ok) throw new Error(data.error ?? "Đặt hàng thất bại.");
       setOrderId(data.order.id);
       clear();
@@ -54,7 +54,7 @@ export default function CheckoutPage() {
     );
   }
 
-  if (!hydrated) return <p className="mx-auto max-w-7xl px-4 py-12 text-center text-slate-500">Đang tải...</p>;
+  if (loading) return <p className="mx-auto max-w-7xl px-4 py-12 text-center text-slate-500">Đang tải...</p>;
 
   if (lines.length === 0) {
     return (

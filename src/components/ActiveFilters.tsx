@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATEGORIES } from "@/data/products";
+import { CATEGORIES } from "@/data/categories";
 import { formatPrice } from "@/lib/format";
 import { countActiveFilters, filtersHref, type ProductFilters } from "@/lib/productFilters";
 

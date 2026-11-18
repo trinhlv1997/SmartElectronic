@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
-import { CartProvider } from "@/context/CartContext";
 
 const font = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -16,16 +13,11 @@ export const metadata: Metadata = {
   description: "Đèn LED, thiết bị điện, thiết bị thông minh và giải pháp năng lượng mặt trời chính hãng.",
 };
 
+// Root layout chỉ chứa font + CSS. Website khách dùng app/(shop)/layout.tsx, trang quản trị dùng app/admin.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" className={font.variable}>
-      <body className="flex min-h-screen flex-col font-sans antialiased">
-        <CartProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </CartProvider>
-      </body>
+      <body className="min-h-screen font-sans antialiased">{children}</body>
     </html>
   );
 }

@@ -1,0 +1,2 @@
+ADMIN_PASSWORD=admin123
+AUTH_SECRET=thay-bang-chuoi-ngau-nhien-openssl-rand-hex-32

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { CATEGORIES } from "@/data/products";
+import { CATEGORIES } from "@/data/categories";
 import { CONTACT, SOLUTIONS } from "@/data/site";
 
 type NavItem = { label: string; href: string; mega?: "products" | "solutions" };

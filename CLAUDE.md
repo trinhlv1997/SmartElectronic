@@ -10,6 +10,7 @@ SmartElectronic is an e-commerce storefront for LED lighting, electrical devices
 
 ```bash
 npm install
+npx wrangler d1 migrations apply DB --local   # local D1 schema + seed (first run / new migrations)
 npm run dev         # dev server at http://localhost:3000
 npm run build       # production build (also type-checks)
 npm run lint        # next lint (ESLint 9 flat config via FlatCompat)
@@ -29,19 +30,20 @@ There is no test framework set up yet.
 - **Product search/filters.** All filter state lives in the URL (`q`, `category`, `min`, `max`, `stock=1`, `sale=1`, `sort`). `src/lib/productFilters.ts` is the single source for parsing (`parseFilters`, which ignores invalid values and swaps min/max) and for building URLs (`filtersHref`). Use it instead of hand-building query strings. Search is diacritic-insensitive through `normalizeText` and matches every token against name, SKU and category label. `FilterPanel`/`SortSelect` are client components that `router.push` a new URL. `ActiveFilters` (server) renders removable chips, and its "clear all" link keeps `sort`.
 - **Static content.** Menus, solutions, featured fields, reasons, stats, news and contact info live in `src/data/site.ts`.
 
-- **Data layer is mock and in-memory.** `src/data/products.ts` holds the product catalog and exposes query functions (`getProducts`, `getProductBySlug`, `getProductsByIds`, ...). Pages must go through these functions and never touch the array directly, so the data source can later be swapped for a database. Orders live in an in-memory `Map` in `src/lib/orders.ts` and are lost when the server restarts.
-- **Server vs client split.** The catalog pages (`/`, `/products`, `/products/[slug]`) are Server Components. They read filters from `searchParams`, and filter links build URLs with `buildHref`, so there is no client-side filter state. `/cart` and `/checkout` are Client Components because they depend on the cart.
+- **Data layer: Cloudflare D1.** Products, orders and order_items live in D1 (binding `DB`, schema in `migrations/`). All DB access goes through `src/server/` (`products.ts`, `orders.ts`), which maps snake_case rows to the camelCase types in `src/lib/types.ts`. `getDb()`/`getEnv()` in `src/server/db.ts` use `getCloudflareContext`. In `next dev`, `initOpenNextCloudflareForDev` (in `next.config.ts`) provides the local D1 (`.wrangler/state`) and `.dev.vars`. Categories are static in `src/data/categories.ts`, and marketing copy is in `src/data/site.ts`. Schema changes require a new migration file, applied with `--local` and with `--remote` before deploy. Rerun `npm run cf-typegen` after changing `wrangler.jsonc` or `.dev.vars` keys; it regenerates the committed `cloudflare-env.d.ts`.
+- **Route groups.** `app/layout.tsx` holds only the font and CSS. The storefront is `app/(shop)/` (Header/Footer/CartProvider, `force-dynamic` so D1 edits show immediately). The admin is `app/admin/`: `login/` is public, and `(panel)/` calls `requireAdmin()` in its layout.
+- **Admin auth.** A single password (secret `ADMIN_PASSWORD`). The session is an HMAC-signed cookie (`AUTH_SECRET`) with no session table, implemented in `src/server/auth.ts`. Mutations are server actions in `src/app/admin/actions.ts`. Every action must call `requireAdmin()` itself, because server actions are public endpoints and the layout check does not protect them.
+- **Server vs client split.** The catalog pages (`/`, `/products`, `/products/[slug]`) are async Server Components that read from D1. `/cart` and `/checkout` are Client Components. `useCartLines` fetches current prices and stock from `GET /api/products?ids=`.
 - **Next 15 async params.** `params` and `searchParams` are Promises and must be awaited.
-- **Cart state.** `src/context/CartContext.tsx` stores only `{ productId, quantity }` and persists it to localStorage. It reads storage after mount and exposes a `hydrated` flag; render cart-dependent UI only once `hydrated` is true to avoid hydration mismatches. `src/lib/useCartLines.ts` joins cart items with product data and computes the subtotal. Because of that join, the catalog module is also bundled on the client.
-- **Order trust boundary.** `POST /api/orders` (`src/app/api/orders/route.ts`) delegates to `createOrder`, which validates customer fields (VN phone `^0\d{9}$`), re-reads prices from the catalog and checks stock. Never trust prices or totals sent by the client.
-- **Product images.** Products use an emoji `icon` as a placeholder. If you switch to real images, add their remote hosts to `images.remotePatterns` in `next.config.ts`.
+- **Cart state.** `src/context/CartContext.tsx` stores only `{ productId, quantity }` and persists it to localStorage. It reads storage after mount and exposes a `hydrated` flag; render cart-dependent UI only once `hydrated` is true to avoid hydration mismatches. `src/lib/useCartLines.ts` joins cart items with product data and computes the subtotal. 
+- **Order trust boundary.** `POST /api/orders` goes to `createOrder` (`src/server/orders.ts`). It validates the customer, re-reads prices from D1 and writes the order, its items and the stock decrements in one `db.batch()` transaction. `CHECK (stock >= 0)` on `products` makes oversell attempts roll back the whole batch, so do not remove that constraint. `order_items` snapshots name and unit price. Cancelling an order in admin restores stock, and reopening it deducts stock again.
+- **Product images.** Images are an optional `imageUrl` rendered with plain `<img>`, which does not need `next/image` config. The emoji `icon` is the fallback.
 - `@/*` resolves to `src/*`.
 
 ## Deployment (Cloudflare Workers, free plan)
 
 - CI/CD: Cloudflare Workers Builds is connected to the GitHub repo. A push to `main` builds with `npx opennextjs-cloudflare build` and deploys with `npx opennextjs-cloudflare deploy`, and other branches get preview versions. The Node version comes from `.nvmrc`. A push to `main` therefore deploys to production.
 - Uses `@opennextjs/cloudflare`; config is in `wrangler.jsonc` (worker `smart-electronic`) and `open-next.config.ts`.
-- The incremental cache is `static-assets-incremental-cache`, which is read-only, has no R2 and no ISR. Prerendered pages are copied into `.open-next/assets/cdn-cgi/_next_cache` by the OpenNext `preview`/`deploy` commands. Running `wrangler dev`/`wrangler deploy` directly skips that step, so every request falls back to SSR and logs "Failed to set to read-only cache" errors. Always use the npm scripts.
-- Do not add `revalidate`/ISR, `unstable_cache` writes or on-demand revalidation unless you also switch to the R2/KV cache, which requires a paid binding setup.
+- The incremental cache is `static-assets-incremental-cache`, which is read-only and has no ISR. Storefront and admin pages are `force-dynamic`, so they do not depend on it. Always deploy via the npm scripts, not raw `wrangler deploy`.
 - Free plan limits: about 10ms CPU per request and 3 MiB gzip worker size (currently about 0.9 MiB). Keep heavy work out of dynamic routes.
-- The in-memory order store in `src/lib/orders.ts` is per-isolate on Workers, so orders are effectively not persisted. Move it to D1 or KV before relying on orders.
+- Production secrets are `ADMIN_PASSWORD` and `AUTH_SECRET`, set with `wrangler secret put`. Without them `/admin` throws.

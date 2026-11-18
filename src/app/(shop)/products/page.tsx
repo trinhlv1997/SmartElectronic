@@ -5,8 +5,9 @@ import FilterPanel from "@/components/FilterPanel";
 import PageBanner from "@/components/PageBanner";
 import ProductCard from "@/components/ProductCard";
 import SortSelect from "@/components/SortSelect";
-import { CATEGORIES, getCategoryCounts, getProducts, isCategory } from "@/data/products";
+import { CATEGORIES, isCategory } from "@/data/categories";
 import { filtersHref, parseFilters } from "@/lib/productFilters";
+import { searchProducts } from "@/server/products";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -14,8 +15,7 @@ export const metadata: Metadata = { title: "Sản phẩm | SmartElectronic" };
 
 export default async function ProductsPage({ searchParams }: { searchParams: SearchParams }) {
   const filters = parseFilters(await searchParams, isCategory);
-  const products = getProducts(filters);
-  const categoryCounts = getCategoryCounts(filters);
+  const { products, categoryCounts } = await searchProducts(filters);
   const categoryLabel = CATEGORIES.find((c) => c.id === filters.category)?.label;
   const title = filters.q ? `Kết quả cho “${filters.q}”` : (categoryLabel ?? "Tất cả sản phẩm");
 

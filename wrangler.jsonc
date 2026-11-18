@@ -8,5 +8,13 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "smart-electronic-db",
+      "database_id": "16d47981-ea54-4f07-9eaf-be808f2489a6",
+      "migrations_dir": "migrations"
+    }
+  ]
 }

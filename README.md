@@ -10,7 +10,9 @@ Node.js 22.12 trở lên (https://nodejs.org) — Wrangler (Cloudflare CLI) yêu
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+cp .dev.vars.example .dev.vars                  # mật khẩu admin cho môi trường dev
+npx wrangler d1 migrations apply DB --local     # tạo database D1 local + dữ liệu mẫu
+npm run dev                                      # http://localhost:3000, quản trị: /admin
 ```
 
 | Lệnh | Mô tả |
@@ -31,7 +33,28 @@ npm run dev        # http://localhost:3000
 - Giỏ hàng lưu trong localStorage
 - Đặt hàng COD qua `POST /api/orders`
 
-Dữ liệu sản phẩm và đơn hàng hiện là dữ liệu mẫu (`src/data/products.ts`, `src/lib/orders.ts`); cần thay bằng database khi triển khai thật.
+## Quản trị (/admin)
+
+Sản phẩm, giá, tồn kho và đơn hàng lưu trong **Cloudflare D1**. Trang `/admin` (đăng nhập bằng mật khẩu) cho phép:
+
+- Thêm / sửa / xoá sản phẩm, ẩn/hiện, đánh dấu nổi bật, ảnh (URL), thông số
+- Sửa nhanh giá bán, giá gốc, tồn kho ngay trên bảng
+- Xem đơn hàng, đổi trạng thái (huỷ đơn tự hoàn tồn kho)
+
+Thay đổi hiển thị trên website ngay, không cần deploy lại.
+
+### Secrets
+
+| Tên | Mô tả |
+| --- | --- |
+| `ADMIN_PASSWORD` | Mật khẩu đăng nhập /admin |
+| `AUTH_SECRET` | Chuỗi ngẫu nhiên ký cookie phiên đăng nhập (`openssl rand -hex 32`) |
+
+Dev: đặt trong `.dev.vars`. Production: `npx wrangler secret put ADMIN_PASSWORD` và `npx wrangler secret put AUTH_SECRET`.
+
+### Database
+
+Schema nằm trong `migrations/`. Thêm migration mới: `npx wrangler d1 migrations create DB <ten>`, rồi áp dụng bằng `npx wrangler d1 migrations apply DB --local` (dev) và `--remote` (production, **trước** khi deploy code dùng schema mới).
 
 ## Deploy lên Cloudflare Workers (gói free)
 
@@ -50,4 +73,4 @@ Repo được kết nối với Cloudflare Workers Builds: mỗi lần push lên
 - Deploy command: `npx opennextjs-cloudflare deploy`
 - Phiên bản Node lấy từ `.nvmrc` (22).
 
-Cấu hình ở `wrangler.jsonc` và `open-next.config.ts`. Cache dùng Workers static assets (miễn phí, không cần R2) nên trang dựng sẵn không được tạo lại định kỳ (không có ISR); muốn cập nhật nội dung thì deploy lại.
+Cấu hình ở `wrangler.jsonc` và `open-next.config.ts`. Các trang website đọc D1 mỗi request (không cache), nên sửa trong /admin là thấy ngay.

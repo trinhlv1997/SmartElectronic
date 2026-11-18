@@ -10,9 +10,14 @@ export default function ProductCard({ product }: { product: Product }) {
     <div className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-xl">
       <Link
         href={`/products/${product.slug}`}
-        className="relative flex aspect-square items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 text-7xl"
+        className="relative flex aspect-square items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 text-7xl"
       >
-        <span className="transition group-hover:scale-110">{product.icon}</span>
+        {product.imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={product.imageUrl} alt={product.name} loading="lazy" className="h-full w-full object-contain p-4 transition group-hover:scale-105" />
+        ) : (
+          <span className="transition group-hover:scale-110">{product.icon}</span>
+        )}
         {discount && (
           <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-0.5 text-xs font-bold text-white">-{discount}%</span>
         )}

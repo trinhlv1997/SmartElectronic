@@ -1,7 +1,7 @@
 // Bộ lọc sản phẩm được lưu hoàn toàn trên URL (?q=&category=&min=&max=&stock=1&sale=1&sort=)
 // để có thể chia sẻ link, dùng nút Back và render phía server.
 // File này không có "use client" nên dùng được ở cả server và client component.
-import type { Category } from "@/lib/types";
+import type { Category, Product } from "@/lib/types";
 
 export const SORTS = [
   { id: "price-asc", label: "Giá tăng dần" },
@@ -86,4 +86,31 @@ export function normalizeText(s: string): string {
     .replace(/Đ/g, "D")
     .toLowerCase()
     .trim();
+}
+
+/** Lọc + sắp xếp một danh sách sản phẩm theo bộ lọc (thuần, không truy cập DB). */
+export function filterProducts(products: Product[], f: ProductFilters, labelOf: (c: Category) => string): Product[] {
+  const tokens = f.q ? normalizeText(f.q).split(/\s+/).filter(Boolean) : [];
+
+  const list = products.filter((p) => {
+    if (f.category && p.category !== f.category) return false;
+    if (f.min !== undefined && p.price < f.min) return false;
+    if (f.max !== undefined && p.price > f.max) return false;
+    if (f.inStock && p.stock === 0) return false;
+    if (f.onSale && !(p.oldPrice && p.oldPrice > p.price)) return false;
+    if (tokens.length) {
+      const haystack = normalizeText(`${p.name} ${p.sku} ${labelOf(p.category)}`);
+      if (!tokens.every((t) => haystack.includes(t))) return false;
+    }
+    return true;
+  });
+
+  const discount = (p: Product) => (p.oldPrice ? (p.oldPrice - p.price) / p.oldPrice : 0);
+  switch (f.sort) {
+    case "price-asc": return [...list].sort((a, b) => a.price - b.price);
+    case "price-desc": return [...list].sort((a, b) => b.price - a.price);
+    case "rating": return [...list].sort((a, b) => b.rating - a.rating);
+    case "discount": return [...list].sort((a, b) => discount(b) - discount(a));
+    default: return list;
+  }
 }

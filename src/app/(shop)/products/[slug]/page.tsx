@@ -2,22 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/AddToCartButton";
-import { CATEGORIES, getAllProducts, getProductBySlug } from "@/data/products";
+import { CATEGORIES } from "@/data/categories";
+import { getActiveProductBySlug } from "@/server/products";
 import { discountPercent, formatPrice } from "@/lib/format";
 
 type Params = Promise<{ slug: string }>;
 
-export function generateStaticParams() {
-  return getAllProducts().map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const product = getProductBySlug((await params).slug);
+  const product = await getActiveProductBySlug((await params).slug);
   return { title: product ? `${product.name} | SmartElectronic` : "Không tìm thấy sản phẩm" };
 }
 
 export default async function ProductDetailPage({ params }: { params: Params }) {
-  const product = getProductBySlug((await params).slug);
+  const product = await getActiveProductBySlug((await params).slug);
   if (!product) notFound();
 
   const category = CATEGORIES.find((c) => c.id === product.category);
@@ -32,8 +29,13 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
       </nav>
 
       <div className="grid gap-8 md:grid-cols-2">
-        <div className="flex aspect-square items-center justify-center rounded-2xl bg-white text-[10rem] shadow-sm">
-          {product.icon}
+        <div className="flex aspect-square items-center justify-center overflow-hidden rounded-2xl bg-slate-50 text-[10rem] shadow-sm">
+          {product.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={product.imageUrl} alt={product.name} className="h-full w-full object-contain" />
+          ) : (
+            product.icon
+          )}
         </div>
         <div className="space-y-4">
           <p className="text-sm text-slate-500">Mã sản phẩm: <strong>{product.sku}</strong></p>

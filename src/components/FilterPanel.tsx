@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { CATEGORIES } from "@/data/products";
+import { CATEGORIES } from "@/data/categories";
 import { countActiveFilters, filtersHref, PRICE_RANGES, type ProductFilters } from "@/lib/productFilters";
 import type { Category } from "@/lib/types";
 

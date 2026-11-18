@@ -2,14 +2,16 @@ import Link from "next/link";
 import HeroSlider from "@/components/HeroSlider";
 import ProductCard from "@/components/ProductCard";
 import SectionTitle from "@/components/SectionTitle";
-import { CATEGORIES, getAllProducts, getFeaturedProducts } from "@/data/products";
+import { CATEGORIES } from "@/data/categories";
 import { FIELDS, NEWS, REASONS, SOLUTIONS, STATS } from "@/data/site";
+import { listActiveProducts } from "@/server/products";
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString("vi-VN");
 
-export default function HomePage() {
-  const suggested = getFeaturedProducts().slice(0, 4);
-  const highlights = getAllProducts().filter((p) => p.oldPrice).slice(0, 8);
+export default async function HomePage() {
+  const products = await listActiveProducts();
+  const suggested = products.filter((p) => p.featured).slice(0, 4);
+  const highlights = products.filter((p) => p.oldPrice && p.oldPrice > p.price).slice(0, 8);
 
   return (
     <>

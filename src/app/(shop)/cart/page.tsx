@@ -6,10 +6,10 @@ import { formatPrice } from "@/lib/format";
 import { useCartLines } from "@/lib/useCartLines";
 
 export default function CartPage() {
-  const { hydrated, setQuantity, remove } = useCart();
-  const { lines, subtotal } = useCartLines();
+  const { setQuantity, remove } = useCart();
+  const { lines, subtotal, loading } = useCartLines();
 
-  if (!hydrated) return <p className="mx-auto max-w-7xl px-4 py-12 text-center text-slate-500">Đang tải giỏ hàng...</p>;
+  if (loading) return <p className="mx-auto max-w-7xl px-4 py-12 text-center text-slate-500">Đang tải giỏ hàng...</p>;
 
   if (lines.length === 0) {
     return (

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CATEGORIES } from "@/data/products";
+import { CATEGORIES } from "@/data/categories";
 import { CONTACT, SOLUTIONS } from "@/data/site";
 
 export default function Footer() {
