@@ -9,6 +9,12 @@
     "binding": "ASSETS"
   },
   "observability": { "enabled": true },
+  // Tên miền chính (zone led-leman.com trên Cloudflare). workers.dev vẫn bật song song.
+  "routes": [
+    { "pattern": "led-leman.com", "custom_domain": true },
+    { "pattern": "www.led-leman.com", "custom_domain": true }
+  ],
+  "workers_dev": true,
   "d1_databases": [
     {
       "binding": "DB",
