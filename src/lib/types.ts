@@ -1,12 +1,12 @@
-export type Category =
-  | "downlight"
-  | "panel"
-  | "bulb"
-  | "outdoor"
-  | "electrical"
-  | "smart"
-  | "solar"
-  | "household";
+/** Category id (slug) — categories are managed in /admin/categories and stored in D1. */
+export type Category = string;
+
+export interface CategoryInfo {
+  id: Category;
+  label: string;
+  icon: string;
+  sortOrder: number;
+}
 
 export interface ProductImage {
   id: string;

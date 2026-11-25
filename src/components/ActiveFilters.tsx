@@ -1,16 +1,16 @@
 import Link from "next/link";
-import { CATEGORIES } from "@/data/categories";
 import { formatPrice } from "@/lib/format";
 import { countActiveFilters, filtersHref, type ProductFilters } from "@/lib/productFilters";
+import type { CategoryInfo } from "@/lib/types";
 
 /** Các bộ lọc đang bật dưới dạng chip, bấm × để bỏ từng cái; "Xóa tất cả" giữ lại cách sắp xếp. */
-export default function ActiveFilters({ filters }: { filters: ProductFilters }) {
+export default function ActiveFilters({ filters, categories }: { filters: ProductFilters; categories: CategoryInfo[] }) {
   if (countActiveFilters(filters) === 0) return null;
 
   const chips: { label: string; href: string }[] = [];
   if (filters.q) chips.push({ label: `“${filters.q}”`, href: filtersHref({ ...filters, q: undefined }) });
   if (filters.category) {
-    const label = CATEGORIES.find((c) => c.id === filters.category)?.label ?? filters.category;
+    const label = categories.find((c) => c.id === filters.category)?.label ?? filters.category;
     chips.push({ label, href: filtersHref({ ...filters, category: undefined }) });
   }
   if (filters.min !== undefined || filters.max !== undefined) {

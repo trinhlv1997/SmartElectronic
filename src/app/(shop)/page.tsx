@@ -2,14 +2,14 @@ import Link from "next/link";
 import HeroSlider from "@/components/HeroSlider";
 import ProductCard from "@/components/ProductCard";
 import SectionTitle from "@/components/SectionTitle";
-import { CATEGORIES } from "@/data/categories";
 import { FIELDS, NEWS, REASONS, SOLUTIONS, STATS } from "@/data/site";
+import { getCategories } from "@/server/categories";
 import { listActiveProducts } from "@/server/products";
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString("vi-VN");
 
 export default async function HomePage() {
-  const products = await listActiveProducts();
+  const [products, categories] = await Promise.all([listActiveProducts(), getCategories()]);
   const suggested = products.filter((p) => p.featured).slice(0, 4);
   const highlights = products.filter((p) => p.oldPrice && p.oldPrice > p.price).slice(0, 8);
 
@@ -21,7 +21,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-4 pt-14">
         <SectionTitle title="Danh mục gợi ý" href="/products" />
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-          {CATEGORIES.map((c) => (
+          {categories.map((c) => (
             <Link
               key={c.id}
               href={`/products?category=${c.id}`}
@@ -68,9 +68,9 @@ export default async function HomePage() {
       </section>
 
       {/* Vì sao chọn */}
-      <section className="mt-14 bg-gradient-to-br from-[#a8121a] to-brand py-14 text-white">
+      <section className="mt-14 bg-gradient-to-br from-navy via-brand-dark to-brand py-14 text-white">
         <div className="mx-auto max-w-7xl px-4">
-          <SectionTitle title="Vì sao chọn SmartElectronic?" light />
+          <SectionTitle title="Vì sao chọn LeMan?" light />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {REASONS.map((r) => (
               <div key={r.title} className="rounded-2xl bg-white/10 p-6 backdrop-blur transition hover:bg-white/15">
@@ -129,7 +129,7 @@ export default async function HomePage() {
         <div className="grid gap-6 md:grid-cols-3">
           {NEWS.map((n) => (
             <Link key={n.slug} href="/news" className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition hover:shadow-lg">
-              <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-brand-50 to-orange-50 text-7xl">
+              <div className="flex aspect-video items-center justify-center bg-gradient-to-br from-brand-50 to-brand-100 text-7xl">
                 <span className="transition group-hover:scale-110">{n.icon}</span>
               </div>
               <div className="p-5">

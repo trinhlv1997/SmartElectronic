@@ -1,4 +1,4 @@
-# SmartElectronic
+# LeMan Electrical & Lighting (storefront)
 
 Website bán đồ điện tử viết bằng Next.js 15 (App Router), React 19, TypeScript và Tailwind CSS v4.
 

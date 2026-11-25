@@ -31,7 +31,7 @@ export default function ProductCard({ product }: { product: Product }) {
           <span className="transition group-hover:scale-110">{product.icon}</span>
         )}
         {discount && (
-          <span className="absolute left-3 top-3 rounded-full bg-brand px-2.5 py-0.5 text-xs font-bold text-white">-{discount}%</span>
+          <span className="absolute left-3 top-3 rounded-full bg-gold px-2.5 py-0.5 text-xs font-bold text-navy">-{discount}%</span>
         )}
         {product.stock === 0 && (
           <span className="absolute right-3 top-3 rounded-full bg-slate-700 px-2.5 py-0.5 text-xs font-semibold text-white">Hết hàng</span>

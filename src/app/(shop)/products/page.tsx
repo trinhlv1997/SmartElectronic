@@ -5,18 +5,20 @@ import FilterPanel from "@/components/FilterPanel";
 import PageBanner from "@/components/PageBanner";
 import ProductCard from "@/components/ProductCard";
 import SortSelect from "@/components/SortSelect";
-import { CATEGORIES, isCategory } from "@/data/categories";
+import { isCategoryIn } from "@/data/categories";
+import { getCategories } from "@/server/categories";
 import { filtersHref, parseFilters } from "@/lib/productFilters";
 import { searchProducts } from "@/server/products";
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-export const metadata: Metadata = { title: "Sản phẩm | SmartElectronic" };
+export const metadata: Metadata = { title: "Sản phẩm | LeMan" };
 
 export default async function ProductsPage({ searchParams }: { searchParams: SearchParams }) {
-  const filters = parseFilters(await searchParams, isCategory);
+  const categories = await getCategories();
+  const filters = parseFilters(await searchParams, isCategoryIn(categories));
   const { products, categoryCounts } = await searchProducts(filters);
-  const categoryLabel = CATEGORIES.find((c) => c.id === filters.category)?.label;
+  const categoryLabel = categories.find((c) => c.id === filters.category)?.label;
   const title = filters.q ? `Kết quả cho “${filters.q}”` : (categoryLabel ?? "Tất cả sản phẩm");
 
   return (
@@ -24,7 +26,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
       <PageBanner title={title} crumbs={[{ label: "Sản phẩm", href: categoryLabel || filters.q ? "/products" : undefined }, ...(categoryLabel ? [{ label: categoryLabel }] : [])]} />
       <div className="mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:grid-cols-[270px_1fr]">
         <div>
-          <FilterPanel filters={filters} categoryCounts={categoryCounts} />
+          <FilterPanel filters={filters} categories={categories} categoryCounts={categoryCounts} />
         </div>
 
         <div className="min-w-0 space-y-5">
@@ -35,7 +37,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Sea
             <SortSelect filters={filters} />
           </div>
 
-          <ActiveFilters filters={filters} />
+          <ActiveFilters filters={filters} categories={categories} />
 
           {products.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 py-16 text-center">

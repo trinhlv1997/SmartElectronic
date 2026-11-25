@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import PageBanner from "@/components/PageBanner";
 import { REASONS, STATS } from "@/data/site";
 
-export const metadata: Metadata = { title: "Về chúng tôi | SmartElectronic" };
+export const metadata: Metadata = { title: "Về chúng tôi | LeMan" };
 
 export default function AboutPage() {
   return (
@@ -10,9 +10,9 @@ export default function AboutPage() {
       <PageBanner title="Về chúng tôi" crumbs={[{ label: "Về chúng tôi" }]} />
       <div className="mx-auto max-w-5xl space-y-10 px-4 py-10">
         <section className="space-y-4 text-slate-700">
-          <h2 className="text-xl font-extrabold uppercase text-ink">SmartElectronic</h2>
+          <h2 className="text-xl font-extrabold uppercase text-ink">LeMan Electrical &amp; Lighting</h2>
           <p>
-            SmartElectronic cung cấp đèn LED, thiết bị điện, thiết bị nhà thông minh và giải pháp năng lượng mặt trời
+            LeMan cung cấp đèn LED, thiết bị điện, thiết bị nhà thông minh và giải pháp năng lượng mặt trời
             cho gia đình, doanh nghiệp và công trình. Chúng tôi hướng tới những không gian sống xanh, an toàn và tiết kiệm năng lượng.
           </p>
           <p>

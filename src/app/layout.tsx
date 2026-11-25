@@ -9,7 +9,7 @@ const font = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "SmartElectronic — Chiếu sáng & thiết bị điện thông minh",
+  title: "LeMan Electrical & Lighting — Đèn LED & thiết bị điện chính hãng",
   description: "Đèn LED, thiết bị điện, thiết bị thông minh và giải pháp năng lượng mặt trời chính hãng.",
 };
 

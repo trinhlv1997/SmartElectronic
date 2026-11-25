@@ -33,7 +33,7 @@ export default function CartPage() {
             <ProductThumb product={product} className="h-16 w-16 text-3xl" />
             <div className="min-w-0 flex-1">
               <Link href={`/products/${product.slug}`} className="font-medium hover:text-brand">{product.name}</Link>
-              <p className="text-sm text-red-600">{formatPrice(product.price)}</p>
+              <p className="text-sm font-semibold text-brand-dark">{formatPrice(product.price)}</p>
             </div>
             <div className="flex items-center rounded-lg border border-slate-300">
               <button className="px-3 py-1" onClick={() => setQuantity(product.id, quantity - 1)} aria-label="Giảm">−</button>
@@ -57,7 +57,7 @@ export default function CartPage() {
         <div className="flex justify-between text-sm"><span>Tạm tính</span><span>{formatPrice(subtotal)}</span></div>
         <div className="flex justify-between text-sm text-green-600"><span>Phí vận chuyển</span><span>Miễn phí</span></div>
         <div className="mt-4 flex justify-between border-t border-slate-200 pt-4 font-bold">
-          <span>Tổng cộng</span><span className="text-red-600">{formatPrice(subtotal)}</span>
+          <span>Tổng cộng</span><span className="text-brand-dark">{formatPrice(subtotal)}</span>
         </div>
         <Link href="/checkout" className="mt-6 block rounded-full bg-brand py-3 text-center font-medium text-white hover:bg-brand-dark">
           Tiến hành đặt hàng

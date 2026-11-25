@@ -1,21 +1,26 @@
-import type { Category } from "@/lib/types";
+import type { Category, CategoryInfo } from "@/lib/types";
 
-// Danh mục cố định trong code (khớp cột products.category trong D1).
-export const CATEGORIES: { id: Category; label: string; icon: string }[] = [
-  { id: "downlight", label: "Đèn LED Downlight", icon: "🔆" },
-  { id: "panel", label: "Đèn LED Panel", icon: "🔲" },
-  { id: "bulb", label: "Bóng đèn LED", icon: "💡" },
-  { id: "outdoor", label: "Đèn đường & pha", icon: "🔦" },
-  { id: "electrical", label: "Thiết bị điện", icon: "🔌" },
-  { id: "smart", label: "Thiết bị thông minh", icon: "📶" },
-  { id: "solar", label: "Năng lượng mặt trời", icon: "☀️" },
-  { id: "household", label: "Đồ gia dụng", icon: "🏠" },
+// Danh mục được quản lý trong /admin/categories (bảng D1 `categories`).
+// Danh sách này chỉ là dự phòng khi bảng chưa được migrate (xem getCategories()).
+export const DEFAULT_CATEGORIES: CategoryInfo[] = [
+  { id: "downlight", label: "Đèn LED Downlight", icon: "🔆", sortOrder: 10 },
+  { id: "panel", label: "Đèn LED Panel", icon: "🔲", sortOrder: 20 },
+  { id: "bulb", label: "Bóng đèn LED", icon: "💡", sortOrder: 30 },
+  { id: "outdoor", label: "Đèn đường & pha", icon: "🔦", sortOrder: 40 },
+  { id: "electrical", label: "Thiết bị điện", icon: "🔌", sortOrder: 50 },
+  { id: "smart", label: "Thiết bị thông minh", icon: "📶", sortOrder: 60 },
+  { id: "solar", label: "Năng lượng mặt trời", icon: "☀️", sortOrder: 70 },
+  { id: "household", label: "Đồ gia dụng", icon: "🏠", sortOrder: 80 },
 ];
 
-export function isCategory(value: unknown): value is Category {
-  return CATEGORIES.some((c) => c.id === value);
+/** Type guard bound to the current category list. */
+export function isCategoryIn(categories: readonly CategoryInfo[]) {
+  const ids = new Set(categories.map((c) => c.id));
+  return (value: unknown): value is Category => typeof value === "string" && ids.has(value);
 }
 
-export function categoryLabel(id: Category): string {
-  return CATEGORIES.find((c) => c.id === id)?.label ?? id;
+/** Label lookup bound to the current category list (falls back to the id). */
+export function labelOf(categories: readonly CategoryInfo[]) {
+  const labels = new Map(categories.map((c) => [c.id, c.label]));
+  return (id: Category): string => labels.get(id) ?? id;
 }

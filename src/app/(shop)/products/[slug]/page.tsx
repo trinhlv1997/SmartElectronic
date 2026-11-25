@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/AddToCartButton";
 import ProductGallery from "@/components/ProductGallery";
-import { CATEGORIES } from "@/data/categories";
+import { getCategories } from "@/server/categories";
 import { getActiveProductBySlug } from "@/server/products";
 import { discountPercent, formatPrice } from "@/lib/format";
 
@@ -11,21 +11,21 @@ type Params = Promise<{ slug: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const product = await getActiveProductBySlug((await params).slug);
-  return { title: product ? `${product.name} | SmartElectronic` : "Không tìm thấy sản phẩm" };
+  return { title: product ? `${product.name} | LeMan` : "Không tìm thấy sản phẩm" };
 }
 
 export default async function ProductDetailPage({ params }: { params: Params }) {
   const product = await getActiveProductBySlug((await params).slug);
   if (!product) notFound();
 
-  const category = CATEGORIES.find((c) => c.id === product.category);
+  const category = (await getCategories()).find((c) => c.id === product.category);
   const discount = discountPercent(product.price, product.oldPrice);
 
   return (
     <div className="mx-auto max-w-7xl space-y-8 px-4 py-8">
       <nav className="text-sm text-slate-500">
         <Link href="/" className="hover:text-brand">Trang chủ</Link> /{" "}
-        <Link href={`/products?category=${product.category}`} className="hover:text-brand">{category?.label}</Link> /{" "}
+        <Link href={`/products?category=${product.category}`} className="hover:text-brand">{category?.label ?? product.category}</Link> /{" "}
         <span className="text-slate-800">{product.name}</span>
       </nav>
 
@@ -36,9 +36,9 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
           <h1 className="text-3xl font-extrabold">{product.name}</h1>
           <p className="text-amber-500">★ {product.rating.toFixed(1)}</p>
           <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-bold text-red-600">{formatPrice(product.price)}</span>
+            <span className="text-3xl font-bold text-brand-dark">{formatPrice(product.price)}</span>
             {product.oldPrice && <span className="text-slate-400 line-through">{formatPrice(product.oldPrice)}</span>}
-            {discount && <span className="rounded bg-red-100 px-2 py-0.5 text-sm font-semibold text-red-600">-{discount}%</span>}
+            {discount && <span className="rounded bg-gold px-2 py-0.5 text-sm font-bold text-navy">-{discount}%</span>}
           </div>
           <p className={product.stock > 0 ? "text-green-600" : "text-red-500"}>
             {product.stock > 0 ? `Còn hàng (${product.stock})` : "Tạm hết hàng"}

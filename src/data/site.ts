@@ -1,10 +1,18 @@
 // Nội dung tĩnh của website (menu, giải pháp, tin tức, thông tin liên hệ).
 
-export const CONTACT = {
+export type ContactInfo = { hotline: string; email: string; address: string };
+
+/** Giá trị mặc định; admin sửa trong /admin/settings (lưu ở D1, đọc qua getContactInfo). */
+export const DEFAULT_CONTACT: ContactInfo = {
   hotline: "1900 0000",
   email: "lienhe@smartelectronic.vn",
   address: "Số 1 Đường Ánh Sáng, Quận Cầu Giấy, Hà Nội",
 };
+
+/** Liên kết tel: từ số hotline hiển thị (bỏ dấu cách, chấm, gạch, ngoặc). */
+export function telHref(hotline: string): string {
+  return `tel:${hotline.replace(/[^\d+]/g, "")}`;
+}
 
 export const SOLUTIONS = [
   { id: "smart-home", title: "Nhà thông minh", icon: "🏡", desc: "Chiếu sáng, công tắc và cảm biến điều khiển qua điện thoại.", category: "smart" },
@@ -16,7 +24,7 @@ export const SOLUTIONS = [
 ] as const;
 
 export const FIELDS = [
-  { title: "Smart Home", sub: "Ngôi nhà thông minh, an toàn và tiện nghi", icon: "🏡", from: "from-rose-600", to: "to-orange-500", category: "smart" },
+  { title: "Smart Home", sub: "Ngôi nhà thông minh, an toàn và tiện nghi", icon: "🏡", from: "from-brand-dark", to: "to-sky-500", category: "smart" },
   { title: "Smart City", sub: "Chiếu sáng đô thị xanh, hiện đại", icon: "🌆", from: "from-slate-800", to: "to-slate-600", category: "outdoor" },
   { title: "Green Energy", sub: "Năng lượng sạch từ mặt trời", icon: "🌞", from: "from-amber-500", to: "to-yellow-400", category: "solar" },
 ] as const;

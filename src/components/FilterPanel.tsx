@@ -2,16 +2,16 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { CATEGORIES } from "@/data/categories";
 import { countActiveFilters, filtersHref, PRICE_RANGES, type ProductFilters } from "@/lib/productFilters";
-import type { Category } from "@/lib/types";
+import type { Category, CategoryInfo } from "@/lib/types";
 
 interface Props {
   filters: ProductFilters;
+  categories: CategoryInfo[];
   categoryCounts: Record<Category, number>;
 }
 
-export default function FilterPanel({ filters, categoryCounts }: Props) {
+export default function FilterPanel({ filters, categories, categoryCounts }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -90,8 +90,8 @@ export default function FilterPanel({ filters, categoryCounts }: Props) {
             <input type="radio" name="category" className="accent-brand" checked={!filters.category} onChange={() => apply({ category: undefined })} />
             <span className="flex-1">Tất cả</span>
           </label>
-          {CATEGORIES.map((c) => (
-            <label key={c.id} className={`${optionRow} ${categoryCounts[c.id] === 0 && filters.category !== c.id ? "opacity-50" : ""}`}>
+          {categories.map((c) => (
+            <label key={c.id} className={`${optionRow} ${!categoryCounts[c.id] && filters.category !== c.id ? "opacity-50" : ""}`}>
               <input
                 type="radio"
                 name="category"

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import QuickEditRow from "@/components/admin/QuickEditRow";
-import { CATEGORIES, categoryLabel, isCategory } from "@/data/categories";
+import { isCategoryIn, labelOf } from "@/data/categories";
+import { getCategories } from "@/server/categories";
 import { normalizeText } from "@/lib/productFilters";
 import { listAllProducts } from "@/server/products";
 
@@ -8,7 +9,9 @@ type SP = Promise<{ q?: string; category?: string; stock?: string; saved?: strin
 
 export default async function AdminProductsPage({ searchParams }: { searchParams: SP }) {
   const { q, category, stock, saved } = await searchParams;
-  const all = await listAllProducts();
+  const [all, categories] = await Promise.all([listAllProducts(), getCategories()]);
+  const isCategory = isCategoryIn(categories);
+  const categoryLabel = labelOf(categories);
   const tokens = q ? normalizeText(q).split(/\s+/).filter(Boolean) : [];
   const products = all.filter((p) => {
     if (isCategory(category) && p.category !== category) return false;
@@ -34,7 +37,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
         <input name="q" defaultValue={q} placeholder="Tìm tên, mã..." className={`${input} min-w-48 flex-1`} />
         <select name="category" defaultValue={category ?? ""} className={input}>
           <option value="">Tất cả danh mục</option>
-          {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+          {categories.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
         </select>
         <select name="stock" defaultValue={stock ?? ""} className={input}>
           <option value="">Mọi tồn kho</option>

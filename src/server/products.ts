@@ -1,7 +1,8 @@
 // Truy cập bảng products. Chỉ import từ server component / route handler / server action.
-import { categoryLabel, isCategory } from "@/data/categories";
+import { labelOf } from "@/data/categories";
 import { filterProducts, type ProductFilters } from "@/lib/productFilters";
 import type { Category, Product } from "@/lib/types";
+import { getCategories } from "./categories";
 import { getDb } from "./db";
 import { deleteAllProductImageFiles, imagesByProduct } from "./images";
 
@@ -37,7 +38,7 @@ function toProduct(r: ProductRow, images: Map<string, Product["images"]>): Produ
     slug: r.slug,
     sku: r.sku,
     name: r.name,
-    category: (isCategory(r.category) ? r.category : "household") as Category,
+    category: r.category,
     price: r.price,
     oldPrice: r.old_price ?? undefined,
     stock: r.stock,
@@ -68,7 +69,8 @@ export async function listActiveProducts(): Promise<Product[]> {
 }
 
 export async function searchProducts(f: ProductFilters) {
-  const all = await listActiveProducts();
+  const [all, categories] = await Promise.all([listActiveProducts(), getCategories()]);
+  const categoryLabel = labelOf(categories);
   const products = filterProducts(all, f, categoryLabel);
   // Số sản phẩm mỗi danh mục khi áp các bộ lọc còn lại.
   const counts = {} as Record<Category, number>;

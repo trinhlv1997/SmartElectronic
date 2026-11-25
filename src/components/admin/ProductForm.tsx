@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { saveProductAction } from "@/app/admin/actions";
-import { CATEGORIES } from "@/data/categories";
-import type { Product } from "@/lib/types";
+import type { CategoryInfo, Product } from "@/lib/types";
 
-export default function ProductForm({ product, specsText }: { product?: Product; specsText?: string }) {
+export default function ProductForm({ product, specsText, categories }: { product?: Product; specsText?: string; categories: CategoryInfo[] }) {
   const [state, action, pending] = useActionState(saveProductAction.bind(null, product?.id ?? null), undefined);
   const [imageUrl, setImageUrl] = useState(product?.imageUrl ?? "");
   const err = state?.errors ?? {};
@@ -33,7 +32,7 @@ export default function ProductForm({ product, specsText }: { product?: Product;
           Danh mục *
           <select name="category" defaultValue={product?.category ?? ""} className={cls("category")}>
             <option value="" disabled>Chọn danh mục</option>
-            {CATEGORIES.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
+            {categories.map((c) => <option key={c.id} value={c.id}>{c.icon} {c.label}</option>)}
           </select>
           <Err k="category" />
         </label>

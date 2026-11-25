@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function PageBanner({ title, crumbs = [] }: { title: string; crumbs?: { label: string; href?: string }[] }) {
   return (
-    <div className="bg-gradient-to-r from-[#a8121a] to-brand text-white">
+    <div className="bg-gradient-to-r from-brand-dark to-brand text-white">
       <div className="mx-auto max-w-7xl px-4 py-8">
         <nav className="text-sm text-white/80">
           <Link href="/" className="hover:text-white">Trang chủ</Link>

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import LoginForm from "@/components/admin/LoginForm";
 import { isAdmin, isAuthConfigured } from "@/server/auth";
 
-export const metadata: Metadata = { title: "Đăng nhập quản trị | SmartElectronic", robots: { index: false } };
+export const metadata: Metadata = { title: "Đăng nhập quản trị | LeMan", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
@@ -15,8 +15,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <div className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-xl">
         <div className="mb-6 text-center">
-          <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand text-2xl text-white">⚡</span>
-          <h1 className="mt-3 text-xl font-extrabold uppercase">Quản trị SmartElectronic</h1>
+          <p className="text-3xl font-extrabold uppercase leading-none tracking-tight text-navy">LeMan</p>
+          <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.14em] text-navy">Electrical &amp; Lighting</p>
+          <h1 className="mt-4 text-lg font-extrabold uppercase">Quản trị hệ thống</h1>
         </div>
         {configured ? (
           <LoginForm next={next} />

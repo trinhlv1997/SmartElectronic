@@ -1,9 +1,14 @@
 @import "tailwindcss";
 
+/* LeMan brand: royal blue primary, deep navy for the wordmark and dark surfaces,
+   sky tints for backgrounds and a gold accent (as on the LEMAN product artwork). */
 @theme {
-  --color-brand: #d71920;
-  --color-brand-dark: #a8121a;
-  --color-brand-50: #fef2f2;
+  --color-brand: #1565c0;
+  --color-brand-dark: #0b3d91;
+  --color-brand-50: #eaf3fd;
+  --color-brand-100: #d4e7fb;
+  --color-navy: #0a2463;
+  --color-gold: #d4a12a;
   --color-ink: #1f2937;
   --font-sans: var(--font-be-vietnam), ui-sans-serif, system-ui, sans-serif;
 }

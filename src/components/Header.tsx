@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "@/context/CartContext";
-import { CATEGORIES } from "@/data/categories";
-import { CONTACT, SOLUTIONS } from "@/data/site";
+import { type ContactInfo, SOLUTIONS, telHref } from "@/data/site";
+import type { CategoryInfo } from "@/lib/types";
 
 type NavItem = { label: string; href: string; mega?: "products" | "solutions" };
 
@@ -16,11 +16,11 @@ const NAV: NavItem[] = [
   { label: "Liên hệ", href: "/contact" },
 ];
 
-function MegaMenu({ kind, onNavigate }: { kind: "products" | "solutions"; onNavigate?: () => void }) {
+function MegaMenu({ kind, categories, onNavigate }: { kind: "products" | "solutions"; categories: CategoryInfo[]; onNavigate?: () => void }) {
   if (kind === "products") {
     return (
       <div className="grid grid-cols-2 gap-1 lg:grid-cols-4">
-        {CATEGORIES.map((c) => (
+        {categories.map((c) => (
           <Link
             key={c.id}
             href={`/products?category=${c.id}`}
@@ -54,7 +54,7 @@ function MegaMenu({ kind, onNavigate }: { kind: "products" | "solutions"; onNavi
   );
 }
 
-export default function Header() {
+export default function Header({ contact, categories }: { contact: ContactInfo; categories: CategoryInfo[] }) {
   const { totalQuantity, hydrated } = useCart();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -64,10 +64,10 @@ export default function Header() {
       {/* Top bar */}
       <div className="bg-brand text-xs text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-1.5">
-          <span className="truncate">Chào mừng bạn đến với SmartElectronic — Giải pháp chiếu sáng & thiết bị điện thông minh</span>
+          <span className="truncate">Chào mừng bạn đến với LeMan — Giải pháp chiếu sáng tiết kiệm, bền bỉ cho mọi không gian</span>
           <span className="hidden shrink-0 gap-4 sm:flex">
-            <a href={`tel:${CONTACT.hotline.replace(/\s/g, "")}`}>☎ Hotline: <strong>{CONTACT.hotline}</strong></a>
-            <a href={`mailto:${CONTACT.email}`}>✉ {CONTACT.email}</a>
+            <a href={telHref(contact.hotline)}>☎ Hotline: <strong>{contact.hotline}</strong></a>
+            <a href={`mailto:${contact.email}`}>✉ {contact.email}</a>
           </span>
         </div>
       </div>
@@ -75,11 +75,12 @@ export default function Header() {
       {/* Main header */}
       <div className="relative border-b border-slate-200">
         <div className="mx-auto flex max-w-7xl items-center gap-6 px-4">
-          <Link href="/" className="flex shrink-0 items-center gap-2 py-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand text-xl text-white">⚡</span>
-            <span className="leading-tight">
-              <span className="block text-lg font-extrabold uppercase tracking-tight text-brand">SmartElectronic</span>
-              <span className="block text-[10px] uppercase tracking-widest text-slate-500">Light & Smart Living</span>
+          <Link href="/" className="flex shrink-0 items-center py-3" aria-label="LeMan - Trang chủ">
+            <span className="leading-none">
+              <span className="block text-[26px] font-extrabold uppercase tracking-tight text-navy">
+                LeMan<sup className="ml-0.5 align-super text-[10px] font-bold">®</sup>
+              </span>
+              <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.14em] text-navy">Electrical &amp; Lighting</span>
             </span>
           </Link>
 
@@ -96,7 +97,7 @@ export default function Header() {
                 {item.mega && (
                   <div className="invisible absolute inset-x-0 top-full border-t-2 border-brand bg-white opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100">
                     <div className="mx-auto max-w-7xl px-4 py-6">
-                      <MegaMenu kind={item.mega} />
+                      <MegaMenu kind={item.mega} categories={categories} />
                     </div>
                   </div>
                 )}
@@ -157,7 +158,7 @@ export default function Header() {
               </Link>
               {item.mega && (
                 <div className="mt-2">
-                  <MegaMenu kind={item.mega} onNavigate={() => setMobileOpen(false)} />
+                  <MegaMenu kind={item.mega} categories={categories} onNavigate={() => setMobileOpen(false)} />
                 </div>
               )}
             </div>

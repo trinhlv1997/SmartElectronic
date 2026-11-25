@@ -3,13 +3,15 @@ import Link from "next/link";
 import { logoutAction } from "@/app/admin/actions";
 import { requireAdmin } from "@/server/auth";
 
-export const metadata: Metadata = { title: "Quản trị | SmartElectronic", robots: { index: false } };
+export const metadata: Metadata = { title: "Quản trị | LeMan", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 const NAV = [
   { href: "/admin", label: "Tổng quan", icon: "📊" },
   { href: "/admin/products", label: "Sản phẩm", icon: "📦" },
+  { href: "/admin/categories", label: "Danh mục", icon: "🗂️" },
   { href: "/admin/orders", label: "Đơn hàng", icon: "🧾" },
+  { href: "/admin/settings", label: "Cài đặt", icon: "⚙️" },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -17,10 +19,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen bg-slate-100 lg:flex">
-      <aside className="bg-[#1b1b1f] text-slate-300 lg:sticky lg:top-0 lg:h-screen lg:w-60 lg:shrink-0">
-        <div className="flex items-center gap-2 px-5 py-4">
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-white">⚡</span>
-          <span className="font-extrabold uppercase text-white">Admin</span>
+      <aside className="bg-navy text-slate-300 lg:sticky lg:top-0 lg:h-screen lg:w-60 lg:shrink-0">
+        <div className="px-5 py-4 leading-none">
+          <span className="block text-xl font-extrabold uppercase tracking-tight text-white">LeMan</span>
+          <span className="mt-1 block text-[10px] font-bold uppercase tracking-[0.14em] text-gold">Quản trị</span>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-3 pb-3 lg:flex-col lg:pb-0">
           {NAV.map((n) => (

@@ -1,4 +1,3 @@
-import { isCategory } from "@/data/categories";
 import { normalizeText } from "@/lib/productFilters";
 import type { ProductInput } from "./products";
 
@@ -35,7 +34,8 @@ export function specsToText(specs: Record<string, string>): string {
   return Object.entries(specs).map(([k, v]) => `${k}: ${v}`).join("\n");
 }
 
-export function parseProductForm(fd: FormData): ParseResult {
+/** `categoryIds`: danh mục hiện có (đọc từ D1 bởi action gọi hàm này). */
+export function parseProductForm(fd: FormData, categoryIds: ReadonlySet<string>): ParseResult {
   const errors: FieldErrors = {};
   const name = str(fd, "name");
   const slug = slugify(str(fd, "slug") || name);
@@ -51,7 +51,7 @@ export function parseProductForm(fd: FormData): ParseResult {
   if (!name) errors.name = "Nhập tên sản phẩm.";
   if (!slug) errors.slug = "Slug không hợp lệ.";
   if (!sku) errors.sku = "Nhập mã sản phẩm.";
-  if (!isCategory(category)) errors.category = "Chọn danh mục.";
+  if (!categoryIds.has(category)) errors.category = "Chọn danh mục.";
   if (price === null || price === "invalid") errors.price = "Giá phải là số nguyên ≥ 0.";
   if (oldPrice === "invalid") errors.oldPrice = "Giá gốc phải là số nguyên ≥ 0.";
   else if (typeof oldPrice === "number" && typeof price === "number" && oldPrice <= price) {
